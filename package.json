@@ -1,5 +1,5 @@
 {
-  "name": "Brume authentication",
+  "name": "brume-auth",
   "version": "1.0.0",
   "description": "Brume auth",
   "main": "cognitoAuth.mjs",
