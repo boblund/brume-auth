@@ -1,6 +1,9 @@
 {
   "name": "brume-auth",
   "version": "1.0.0",
+	"config": {
+    "install-strategy": "nested"
+  },
   "description": "Brume auth",
   "main": "cognitoAuth.mjs",
   "scripts": {
