@@ -4,8 +4,11 @@ let AuthenticationDetails, CognitoUserPool, CognitoUser;
 if( typeof Window === 'undefined' ){
 	( { AuthenticationDetails, CognitoUserPool, CognitoUser } = await import( 'amazon-cognito-identity-js' ) );
 } else {
-	await import( './amazon-cognito-identity.min.js' );
-	( { AuthenticationDetails, CognitoUserPool, CognitoUser } = window.AmazonCognitoIdentity );
+	const Cognito = await import( './amazon-cognito-identity.min.js' );
+	if( Cognito?.__esModule !== true ){ // true if webpack
+		Cognito = window.AmazonCognitoIdentity; // in browser
+	}
+	( { AuthenticationDetails, CognitoUserPool, CognitoUser } = Cognito );
 }
 
 const userPool = new CognitoUserPool( { UserPoolId: 'us-east-1_p5E3AsRc8', ClientId: '6dspdoqn9q00f0v42c12qvkh5l' } );
