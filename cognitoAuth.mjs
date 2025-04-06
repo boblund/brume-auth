@@ -4,7 +4,7 @@ let AuthenticationDetails, CognitoUserPool, CognitoUser;
 if( typeof Window === 'undefined' ){
 	( { AuthenticationDetails, CognitoUserPool, CognitoUser } = await import( 'amazon-cognito-identity-js' ) );
 } else {
-	const Cognito = await import( './amazon-cognito-identity.min.js' );
+	let Cognito = await import( './amazon-cognito-identity.min.js' );
 	if( Cognito?.__esModule !== true ){ // true if webpack
 		Cognito = window.AmazonCognitoIdentity; // in browser
 	}
