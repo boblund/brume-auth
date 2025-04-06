@@ -28,7 +28,7 @@ function userPassAuth( username, password ) {
 	} );
 }
 
-function refreshTokenAuth( ClientId, refreshToken, user ) {
+function refreshTokenAuth( refreshToken, user ) {
 	return new Promise( ( res, rej ) => {
 		try {
 			const cognitoUser = new CognitoUser( { Username: user, Pool: userPool } );
