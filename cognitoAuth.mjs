@@ -1,20 +1,45 @@
-import { CognitoIdentityProviderClient, InitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
-export { refreshTokenAuth };
+export { userPassAuth, refreshTokenAuth };
 
-const client = new CognitoIdentityProviderClient( { region: 'us-east-1' } );
-
-async function refreshTokenAuth( ClientId, REFRESH_TOKEN ) {
-	const params = { 
-		ClientId,
-		AuthFlow: "REFRESH_TOKEN_AUTH",
-		AuthParameters: { REFRESH_TOKEN }
-	};
-
-	try {
-		const command = new InitiateAuthCommand( params );
-		const r = await client.send( command );
-		return r.AuthenticationResult;
-	} catch( e ){
-		throw( e );
+let AuthenticationDetails, CognitoUserPool, CognitoUser;
+if( typeof Window === 'undefined' ){
+	( { AuthenticationDetails, CognitoUserPool, CognitoUser } = await import( 'amazon-cognito-identity-js' ) );
+} else {
+	let Cognito = await import( './amazon-cognito-identity.min.js' );
+	if( Cognito?.__esModule !== true ){ // true if webpack
+		Cognito = window.AmazonCognitoIdentity; // in browser
 	}
+	( { AuthenticationDetails, CognitoUserPool, CognitoUser } = Cognito );
+}
+
+const userPool = new CognitoUserPool( { UserPoolId: 'us-east-1_p5E3AsRc8', ClientId: '6dspdoqn9q00f0v42c12qvkh5l' } );
+
+function userPassAuth( username, password ) {
+	return new Promise( ( res, rej ) => {
+		const authenticationDetails = new AuthenticationDetails( { Username: username, Password: password } );
+		const cognitoUser = new CognitoUser( { Username: username, Pool: userPool } );
+
+		cognitoUser.authenticateUser( authenticationDetails, {
+			onSuccess: function( result ) {
+				cognitoUser.getUserAttributes( ( e, r ) => {
+					res( { IdToken: result.getIdToken().getJwtToken() } );
+				} );
+			},
+			onFailure: function( err ) {
+				res ( { error: err } );
+			}
+		} );
+	} );
+}
+
+function refreshTokenAuth( refreshToken, user ) {
+	return new Promise( ( res, rej ) => {
+		try {
+			const cognitoUser = new CognitoUser( { Username: user, Pool: userPool } );
+			cognitoUser.refreshSession( { getToken(){ return refreshToken; } }, ( err, session ) => {
+				err ? rej( err ) : res( { IdToken: session.getIdToken().getJwtToken() } );
+			} );
+		} catch( e ){
+			rej( e );
+		}
+	} );
 };
