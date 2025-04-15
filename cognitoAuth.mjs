@@ -1,15 +1,11 @@
 export { userPassAuth, refreshTokenAuth };
 
-let AuthenticationDetails, CognitoUserPool, CognitoUser;
-if( typeof Window === 'undefined' ){
-	( { AuthenticationDetails, CognitoUserPool, CognitoUser } = await import( 'amazon-cognito-identity-js' ) );
-} else {
-	let Cognito = await import( './amazon-cognito-identity.min.js' );
-	if( Cognito?.__esModule !== true ){ // true if webpack
-		Cognito = window.AmazonCognitoIdentity; // in browser
-	}
-	( { AuthenticationDetails, CognitoUserPool, CognitoUser } = Cognito );
-}
+let Cognito;
+const { AuthenticationDetails, CognitoUserPool, CognitoUser } = typeof Window === 'undefined'
+	? await import( 'amazon-cognito-identity-js' ) // nodejs
+	: ( Cognito = await import( './amazon-cognito-identity.min.js' ) )?.__esModule
+		? Cognito // Webpack
+		: window.AmazonCognitoIdentity; // browser
 
 const userPool = new CognitoUserPool( { UserPoolId: 'us-east-1_p5E3AsRc8', ClientId: '6dspdoqn9q00f0v42c12qvkh5l' } );
 
